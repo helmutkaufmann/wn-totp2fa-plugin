@@ -1,0 +1,25 @@
+{
+  "name": "mercator/totp2fa",
+  "description": "TOTP-based 2FA for Winter CMS backend users with one-time recovery code display.",
+  "type": "winter-plugin",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.2",
+    "pragmarx/google2fa": "^8.0",
+    "bacon/bacon-qr-code": "^3.0"
+  },
+  authors": [
+        {
+            "name": "Helmut Kaufmann",
+            "email": "software@mercator.li",
+            "role": "Original Author"
+        }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Mercator\\Totp2fa\\": ""
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

@@ -1,0 +1,13 @@
+<div class="padded-container">
+    <p><strong>Save these recovery codes now.</strong> Each code can be used once if you lose access to your authenticator app.</p>
+
+    <div class="form-group">
+        <textarea class="form-control" rows="8" readonly><?php foreach ((array) $codes as $c) { echo $c . "\n"; } ?></textarea>
+        <p style="margin-top:8px; opacity:0.8;">After you leave this screen, these codes will not be shown again. You can regenerate a new set later.</p>
+    </div>
+
+    <form data-request="onAcknowledgeRecovery">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-primary">I have saved these codes</button>
+    </form>
+</div>

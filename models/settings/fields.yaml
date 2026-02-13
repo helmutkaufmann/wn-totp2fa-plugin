@@ -1,0 +1,18 @@
+fields:
+  require_mode:
+    label: Require 2FA
+    type: dropdown
+    options:
+      off: Off
+      all: Required for all backend users
+      roles: Required for selected roles
+    default: off
+
+  require_roles:
+    label: Required roles (comma-separated)
+    type: text
+    comment: Used when "Required for selected roles" is chosen. Match role codes or names.
+    trigger:
+      action: show
+      field: require_mode
+      condition: value[roles]

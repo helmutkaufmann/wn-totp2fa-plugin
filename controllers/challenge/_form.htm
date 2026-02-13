@@ -1,0 +1,37 @@
+<?php if ($mode === 'verify'): ?>
+    <form data-request="onVerify" class="padded-container">
+        <?= csrf_field() ?>
+        <p>Enter the 6-digit code from your authenticator app (or a recovery code).</p>
+
+        <div class="form-group">
+            <label>Code</label>
+            <input name="code" class="form-control" autocomplete="one-time-code" inputmode="numeric" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Verify</button>
+    </form>
+<?php else: ?>
+    <form data-request="onConfirmSetup" class="padded-container">
+        <?= csrf_field() ?>
+        <?php if ($requires): ?>
+            <p>2FA is required for your account. Set it up to continue.</p>
+        <?php else: ?>
+            <p>Set up 2FA for your account.</p>
+        <?php endif; ?>
+
+        <div class="form-group">
+            <p>Scan this QR code with your authenticator app:</p>
+            <div style="max-width:240px;">
+                <?= $qrSvg ?>
+            </div>
+            <p style="margin-top:10px;">Secret (manual entry): <code><?= e($secret) ?></code></p>
+        </div>
+
+        <div class="form-group">
+            <label>Verification code</label>
+            <input name="code" class="form-control" autocomplete="one-time-code" inputmode="numeric" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enable 2FA</button>
+    </form>
+<?php endif; ?>

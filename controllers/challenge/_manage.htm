@@ -1,0 +1,8 @@
+<div class="padded-container">
+    <p>You can regenerate recovery codes here. The new codes will be shown <strong>once</strong> immediately after regeneration.</p>
+
+    <form data-request="onRegenerateRecovery">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-warning">Regenerate recovery codes</button>
+    </form>
+</div>

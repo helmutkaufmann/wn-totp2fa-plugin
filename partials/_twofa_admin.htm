@@ -1,0 +1,87 @@
+<?php
+use Mercator\Totp2fa\Classes\TotpStorage;
+
+$user = $formModel;
+
+$action = post('mercator_twofa_action');
+
+$adminNewCodes = (array) session('mercator.totp2fa.admin_new_recovery_codes.' . $user->id, []);
+
+
+if ($action === 'disable') {
+    $user->twofa_enabled = false;
+    $user->twofa_secret = null;
+    $user->twofa_pending_secret = null;
+    $user->twofa_confirmed_at = null;
+    $user->twofa_recovery_codes = null;
+    $user->twofa_recovery_generated_at = null;
+    $user->twofa_recovery_shown_at = null;
+    $user->save();
+    Flash::success('2FA disabled for this user.');
+}
+
+if ($action === 'clear_admin_recovery_codes') {
+    session()->forget('mercator.totp2fa.admin_new_recovery_codes.' . $user->id);
+    $adminNewCodes = [];
+}
+
+if ($action === 'regen_recovery_admin') {
+    if ($user->twofa_enabled) {
+        $codes = TotpStorage::makeRecoveryCodes();
+        $user->twofa_recovery_codes = TotpStorage::encJson($codes);
+        $user->twofa_recovery_generated_at = now();
+        $user->twofa_recovery_shown_at = null; // user must view once via their own flow
+        $user->save();
+
+        // Store plaintext codes in session so an admin can copy them once.
+        session(['mercator.totp2fa.admin_new_recovery_codes.' . $user->id => $codes]);
+        $adminNewCodes = $codes;
+
+        Flash::success('Recovery codes regenerated. Copy them now; they will be hidden after confirmation.');
+    }
+}
+?>
+
+<div class="form-group">
+    <p>Status: <strong><?= $user->twofa_enabled ? 'Enabled' : 'Disabled' ?></strong></p>
+
+    <?php if ($user->twofa_enabled): ?>
+        <form method="post" style="display:inline-block; margin-right:10px;">
+            <?= csrf_field() ?>
+            <input type="hidden" name="mercator_twofa_action" value="disable">
+            <button class="btn btn-danger">Disable 2FA</button>
+        </form>
+
+        <form method="post" style="display:inline-block;">
+            <?= csrf_field() ?>
+            <input type="hidden" name="mercator_twofa_action" value="regen_recovery_admin">
+            <button class="btn btn-default">Regenerate recovery codes</button>
+        </form>
+
+        <?php if (!empty($adminNewCodes)): ?>
+    <div style="margin-top: 15px;">
+        <p><strong>New recovery codes (copy now):</strong></p>
+        <textarea class="form-control" rows="8" readonly><?php foreach ($adminNewCodes as $c) { echo $c . "\n"; } ?></textarea>
+
+        <div style="margin-top:10px;">
+            <button type="button" class="btn btn-default" onclick="(function(btn){var ta=btn.parentNode.parentNode.querySelector('textarea');ta.select();document.execCommand('copy');})(this);">Copy to clipboard</button>
+
+            <form method="post" style="display:inline-block; margin-left:10px;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="mercator_twofa_action" value="clear_admin_recovery_codes">
+                <button class="btn btn-primary">I have saved these codes</button>
+            </form>
+        </div>
+
+        <p style="margin-top:10px; opacity:0.8;">After dismissing, these codes will not be shown again. Regenerate to create a new set.</p>
+    </div>
+<?php endif; ?>
+
+<p style="margin-top:12px; opacity:0.8;">
+            Recovery codes are <strong>not displayed</strong> by default in this admin view.
+            The user can view newly generated codes <strong>once</strong> after enrollment or self-service regeneration.
+        </p>
+    <?php else: ?>
+        <p style="opacity:0.8;">User must enroll via login flow if enforcement requires it.</p>
+    <?php endif; ?>
+</div>
