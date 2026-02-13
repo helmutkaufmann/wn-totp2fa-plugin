@@ -8,7 +8,7 @@
     "pragmarx/google2fa": "^8.0",
     "bacon/bacon-qr-code": "^3.0"
   },
-  authors": [
+  "authors": [
         {
             "name": "Helmut Kaufmann",
             "email": "software@mercator.li",
