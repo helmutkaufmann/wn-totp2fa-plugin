@@ -1,13 +1,85 @@
-<div class="padded-container">
-    <p><strong>Save these recovery codes now.</strong> Each code can be used once if you lose access to your authenticator app.</p>
+<div style="
+    background:#ffffff;
+    padding:24px;
+    border-radius:10px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    max-width:600px;
+    margin:40px auto;
+">
 
-    <div class="form-group">
-        <textarea class="form-control" rows="8" readonly><?php foreach ((array) $codes as $c) { echo $c . "\n"; } ?></textarea>
-        <p style="margin-top:8px; opacity:0.8;">After you leave this screen, these codes will not be shown again. You can regenerate a new set later.</p>
+    <p style="margin-bottom:18px; font-size:16px;">
+        <strong>Save these recovery codes now.</strong><br>
+        Each code can be used once if you lose access to your authenticator app.
+    </p>
+
+    <div style="margin-bottom:20px;">
+
+        <div style="
+            position:relative;
+            background:#f8f9fa;
+            border:1px solid #dcdcdc;
+            border-radius:6px;
+            padding:16px;
+        ">
+
+            <textarea
+                id="recovery-codes"
+                rows="8"
+                readonly
+                style="
+                    width:100%;
+                    border:none;
+                    background:transparent;
+                    resize:none;
+                    font-family:monospace;
+                    font-size:16px;
+                    font-weight:600;
+                    letter-spacing:1px;
+                    color:#000;
+                    outline:none;
+                "
+            ><?php foreach ((array) $codes as $c) { echo $c . "\n"; } ?></textarea>
+
+            <button type="button"
+                    onclick="navigator.clipboard.writeText(document.getElementById('recovery-codes').value)"
+                    style="
+                        position:absolute;
+                        top:10px;
+                        right:10px;
+                        padding:6px 12px;
+                        border:none;
+                        background:#007bff;
+                        color:#fff;
+                        border-radius:4px;
+                        font-weight:600;
+                        cursor:pointer;
+                    ">
+                Copy all
+            </button>
+
+        </div>
+
+        <p style="margin-top:10px; font-size:14px; color:#555;">
+            After you leave this screen, these codes will not be shown again.
+            You can regenerate a new set later.
+        </p>
     </div>
 
     <form data-request="onAcknowledgeRecovery">
         <?= csrf_field() ?>
-        <button type="submit" class="btn btn-primary">I have saved these codes</button>
+        <button type="submit"
+                style="
+                    height:44px;
+                    padding:0 20px;
+                    border:none;
+                    background:#007bff;
+                    color:#fff;
+                    border-radius:4px;
+                    font-weight:600;
+                    cursor:pointer;
+                ">
+            I have saved these codes
+        </button>
     </form>
+
 </div>
