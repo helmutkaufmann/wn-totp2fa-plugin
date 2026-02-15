@@ -7,6 +7,7 @@ use Backend\Models\User as BackendUser;
 use Flash;
 use Redirect;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Log;
 
 use Mercator\Totp2fa\Classes\Enforcement;
 use Mercator\Totp2fa\Classes\Qr;
@@ -183,17 +184,37 @@ session()->forget('url.intended');
 
         if (!$validTotp) {
             $recovery = TotpStorage::decJson($user->twofa_recovery_codes);
-            $idx = array_search($code, $recovery, true);
-            if ($idx !== false) {
-                unset($recovery[$idx]);
+            $matchedIndex = null;
+            
+            // Use constant-time comparison to prevent timing attacks
+            foreach ($recovery as $idx => $recoveryCode) {
+                if (hash_equals($recoveryCode, $code)) {
+                    $matchedIndex = $idx;
+                    break;
+                }
+            }
+            
+            if ($matchedIndex !== null) {
+                unset($recovery[$matchedIndex]);
                 $user->twofa_recovery_codes = TotpStorage::encJson(array_values($recovery));
                 $user->save();
                 $validTotp = true;
+                Log::info('Recovery code used successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'ip' => request()->ip(),
+                ]);
             }
         }
 
         if (!$validTotp) {
             RateLimiter::hit($key, 300);
+            Log::warning('Failed 2FA verification attempt', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => request()->ip(),
+                'attempted_code_length' => strlen($code),
+            ]);
             Flash::error('Invalid 2FA code.');
             return Redirect::refresh();
         }
@@ -233,6 +254,12 @@ session()->forget('url.intended');
 
         if (!$pending || !$google2fa->verifyKey($pending, $code)) {
             RateLimiter::hit($key, 300);
+            Log::warning('Failed 2FA setup confirmation attempt', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => request()->ip(),
+                'attempted_code_length' => strlen($code),
+            ]);
             Flash::error('Invalid code. Make sure your authenticator app is set up correctly.');
             return Redirect::refresh();
         }

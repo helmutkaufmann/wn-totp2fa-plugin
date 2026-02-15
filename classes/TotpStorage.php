@@ -37,6 +37,11 @@ class TotpStorage
 
     public static function makeRecoveryCodes(int $count = 10): array
     {
+        // Validate count to prevent DoS attacks
+        if ($count < 1 || $count > 100) {
+            throw new \InvalidArgumentException('Recovery code count must be between 1 and 100');
+        }
+        
         $codes = [];
         for ($i = 0; $i < $count; $i++) {
             $codes[] = Str::upper(Str::random(10) . '-' . Str::random(10));
