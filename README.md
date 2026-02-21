@@ -1,5 +1,5 @@
-# Mercator.Totp2fa
-Time-based one time password two-factor authentication (TOZP 2FA) for **Winter CMS backend users**.
+# Mercator.TOTP2FA
+Time-based one time password two-factor authentication (TOTP 2FA) for Winter CMS backend users.
 
 ## Description
 - Backend decides which users **must** enroll (Off / All / Roles).
@@ -25,7 +25,7 @@ Run plugin migrations
 php artisan winter:up
 ```
 
-Configure enforcement in the backend → Settings → Security → **Backend 2FA (TOTP)**
+Configure enforcement in the backend → Settings → Security → Backend TOTP 2FA
 - Off
 - All users
 - Selected roles (comma-separated role codes or names)
