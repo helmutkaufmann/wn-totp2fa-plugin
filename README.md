@@ -30,6 +30,8 @@ Configure enforcement in the backend → Settings → Security → Backend TOTP 
 - All users
 - Selected roles (choose from a checkbox list of all backend roles)
 
+> **Note:** if the plugin is unable to determine a user’s roles (for example, if the role relationship is missing), enforcement will now default to **not** requiring 2FA rather than locking everybody out.  A warning is written to the log in that case.
+
 ## Additional information
 ### User flow
 - If required and not enrolled → `/mercator/totp2fa/challenge/setup`

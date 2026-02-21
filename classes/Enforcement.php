@@ -16,32 +16,56 @@ class Enforcement
         if ($mode === 'all') return true;
 
         if ($mode === 'roles') {
-            $needles = Settings::get('require_roles', []);
-            // allow legacy comma-separated string for existing installations
-            if (!is_array($needles)) {
-                $needles = array_values(array_filter(array_map('trim', explode(',', (string) $needles))));
+            $needles = Settings::get('require_roles', '[]');
+            // Decode JSON if it's a string
+            if (is_string($needles)) {
+                $needles = json_decode($needles, true) ?? [];
             }
+            // ensure clean array with no empty strings; reindex to get fresh keys
+            $needles = array_values(array_filter($needles, function ($v) { return trim((string) $v) !== ''; }));
             if (!$needles) {
                 return false;
             }
 
+            \Log::info('TOTP2FA: checking roles for user ' . $user->login . '. Required roles: ' . json_encode($needles));
+
             try {
-                $roles = $user->roles;
-                foreach ($roles as $role) {
-                    $code = (string) ($role->code ?? '');
-                    $name = (string) ($role->name ?? '');
-                    foreach ($needles as $n) {
-                        if ($n !== '' && (strcasecmp($n, $code) === 0 || strcasecmp($n, $name) === 0)) {
-                            return true;
-                        }
+                // In WinterCMS, users have a single role (not roles relationship)
+                // Access role via role_id and the role attribute
+                $userRole = $user->role;
+                if (!$userRole) {
+                    \Log::info('TOTP2FA: user ' . $user->login . ' has no role assigned.');
+                    return false;
+                }
+
+                // use the same key generation as getRequireRolesOptions()
+                $key = (string) ($userRole->code ?? $userRole->id ?? '');
+                $name = (string) ($userRole->name ?? $key);
+                
+                \Log::info('TOTP2FA: user ' . $user->login . ' has role - code/id: ' . $key . ', name: ' . $name);
+                
+                if ($key === '') {
+                    \Log::info('TOTP2FA: user ' . $user->login . ' role has no valid identifier.');
+                    return false;
+                }
+                
+                foreach ($needles as $n) {
+                    $nStr = trim((string) $n);
+                    if ($nStr !== '' && (strcasecmp($nStr, $key) === 0 || strcasecmp($nStr, $name) === 0)) {
+                        \Log::info('TOTP2FA: user ' . $user->login . ' matches required role ' . $nStr);
+                        return true;
                     }
                 }
+                // no matching role found
+                \Log::info('TOTP2FA: user ' . $user->login . ' does not match any required role.');
+                return false;
             } catch (\Throwable $e) {
-                // If role resolution fails, fail closed.
-                return true;
+                // If role resolution fails, fail open rather than locking every user out.
+                // Log the exception so admins can troubleshoot their setup.
+                \Log::warning('TOTP2FA: unable to inspect user roles for enforcement: ' . $e->getMessage());
+                \Log::warning('TOTP2FA: exception trace: ' . $e->getTraceAsString());
+                return false;
             }
-
-            return false;
         }
 
         return false;
