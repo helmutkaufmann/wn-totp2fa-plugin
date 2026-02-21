@@ -1,10 +1,11 @@
 {
   "name": "mercator/totp2fa",
-  "description": "Time-based one-time password 2FA for Winter CMS backend users with one-time recovery code display.",
+  "description": "TOTP 2FA for Winter CMS backend users.",
   "type": "winter-plugin",
   "license": "MIT",
   "require": {
     "php": ">=8.2",
+    "winter/wn-user-plugin": "^2.2",
     "pragmarx/google2fa": "^8.0.2",
     "bacon/bacon-qr-code": "^3.0"
   },

@@ -21,8 +21,8 @@ class Plugin extends PluginBase
     {
         return [
             'name'        => 'Backend TOTP 2FA',
-            'description' => 'TOTP-based 2FA for Winter backend users with one-time recovery code display.',
-            'author'      => 'Mercator',
+            'description' => 'TOTP 2FA for backend users.',
+            'author'      => '"Helmut Kaufmann',
             'icon'        => 'icon-lock',
         ];
     }
@@ -31,7 +31,7 @@ class Plugin extends PluginBase
     {
         return [
             'mercator.totp2fa.manage_settings' => [
-                'label' => 'Manage backend TOTP 2FA settings',
+                'label' => 'Manage TOTP 2FA settings for backend users',
                 'tab'   => 'Security',
             ],
         ];
@@ -41,13 +41,13 @@ class Plugin extends PluginBase
     {
         return [
             'settings' => [
-                'label'       => 'Backend 2FA (TOTP)',
-                'description' => 'Configure backend time-based one-time password 2FA enforcement.',
+                'label'       => 'Backend TOTP 2FA',
+                'description' => 'Configure time-based one-time password 2FA for backend users.',
                 'category'    => 'Security',
                 'icon'        => 'icon-lock',
                 'class'       => \Mercator\Totp2fa\Models\Settings::class,
                 'order'       => 500,
-                'keywords'    => '2fa totp mfa security password',
+                'keywords'    => '2fa totp mfa security password authenticator',
                 'permissions' => ['mercator.totp2fa.manage_settings'],
             ],
         ];
