@@ -31,7 +31,7 @@ class Plugin extends PluginBase
     {
         return [
             'mercator.totp2fa.manage_settings' => [
-                'label' => 'Manage backend 2FA settings',
+                'label' => 'Manage backend TOTP 2FA settings',
                 'tab'   => 'Security',
             ],
         ];
@@ -42,12 +42,12 @@ class Plugin extends PluginBase
         return [
             'settings' => [
                 'label'       => 'Backend 2FA (TOTP)',
-                'description' => 'Configure backend 2FA enforcement.',
+                'description' => 'Configure backend time-based one-time password 2FA enforcement.',
                 'category'    => 'Security',
                 'icon'        => 'icon-lock',
                 'class'       => \Mercator\Totp2fa\Models\Settings::class,
                 'order'       => 500,
-                'keywords'    => '2fa totp mfa security',
+                'keywords'    => '2fa totp mfa security password',
                 'permissions' => ['mercator.totp2fa.manage_settings'],
             ],
         ];

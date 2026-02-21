@@ -1,6 +1,6 @@
 {
   "name": "mercator/totp2fa",
-  "description": "TOTP-based 2FA for Winter CMS backend users with one-time recovery code display.",
+  "description": "Time-based one-time password 2FA for Winter CMS backend users with one-time recovery code display.",
   "type": "winter-plugin",
   "license": "MIT",
   "require": {
@@ -12,7 +12,7 @@
         {
             "name": "Helmut Kaufmann",
             "email": "software@mercator.li",
-            "role": "Original Author"
+            "role": "Author"
         }
   ],
   "autoload": {

@@ -1,6 +1,6 @@
 <?php return [
     'plugin' => [
         'name' => 'Backend TOTP 2FA',
-        'description' => 'TOTP-based 2FA for backend users.',
+        'description' => 'Time-based one-time password for backend users.',
     ],
 ];
