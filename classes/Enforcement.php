@@ -16,9 +16,14 @@ class Enforcement
         if ($mode === 'all') return true;
 
         if ($mode === 'roles') {
-            $rolesRaw = (string) Settings::get('require_roles', '');
-            $needles = array_values(array_filter(array_map('trim', explode(',', $rolesRaw))));
-            if (!$needles) return false;
+            $needles = Settings::get('require_roles', []);
+            // allow legacy comma-separated string for existing installations
+            if (!is_array($needles)) {
+                $needles = array_values(array_filter(array_map('trim', explode(',', (string) $needles))));
+            }
+            if (!$needles) {
+                return false;
+            }
 
             try {
                 $roles = $user->roles;

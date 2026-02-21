@@ -28,7 +28,7 @@ php artisan winter:up
 Configure enforcement in the backend → Settings → Security → Backend TOTP 2FA
 - Off
 - All users
-- Selected roles (comma-separated role codes or names)
+- Selected roles (choose from a checkbox list of all backend roles)
 
 ## Additional information
 ### User flow

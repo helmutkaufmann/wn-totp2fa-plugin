@@ -9,9 +9,10 @@ fields:
     default: off
 
   require_roles:
-    label: Required roles (comma-separated)
-    type: text
-    comment: Used when "Required for selected roles" is chosen. Match role codes or names.
+    label: Required roles
+    type: checkboxlist
+    options: getRequireRolesOptions
+    comment: Select backend roles that should be subject to 2FA enforcement.
     trigger:
       action: show
       field: require_mode
