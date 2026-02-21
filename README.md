@@ -3,8 +3,8 @@ Time-based one time password two-factor authentication (TOTP 2FA) for Winter CMS
 
 ## Description
 - Backend decides which users **must** enroll (Off / All / Roles).
-- If a user must use 2FA but has none, user is forced into **enrollment**. Recovery codes are shown **once**, immediately after enrollment.
-- Users can regenerate recovery codes themselves in the backend. New codes are shown **once** immediately after regeneration
+- If a user must use 2FA but has none, user is forced into **enrollment**. Recovery codes are shown once, immediately after enrollment.
+- Users can regenerate recovery codes themselves in the backend. New codes are shown once immediately after regeneration
 
 ## Requirements
 - Winter CMS 1.3 (Laravel 12)
