@@ -1,57 +1,66 @@
 # Mercator.Totp2fa
+Time-based one time password two-factor authentication (TOZP 2FA) for **Winter CMS backend users**.
 
-TOTP-based two-factor authentication (2FA) for **Winter CMS backend users**, with **one-time display** of recovery codes.
-
-## Goals (behaviour)
-
+## Description
 - Backend decides which users **must** enroll (Off / All / Roles).
-- If a user must use 2FA but has none:
-  - user is forced into **enrollment**
-  - recovery codes are shown **once**, immediately after enrollment
-- Recovery codes are **never shown** in the backend user management form.
-  - Users can regenerate recovery codes themselves
-  - New codes are shown **once** immediately after regeneration
-- Recovery codes are stored **encrypted** in the database.
+- If a user must use 2FA but has none, user is forced into **enrollment**. Recovery codes are shown **once**, immediately after enrollment.
+- Users can regenerate recovery codes themselves in the backend. New codes are shown **once** immediately after regeneration
 
 ## Requirements
-
 - Winter CMS 1.3 (Laravel 12)
 - PHP >= 8.2
 - Composer:
   - pragmarx/google2fa
   - bacon/bacon-qr-code
+  - winter/wn-user-plugin
 
-## Install
-
-1) Copy to `plugins/mercator/totp2fa`
-
-2) Install dependencies:
-
+## Installation
+Run composer installation
 ```bash
 composer require pragmarx/google2fa bacon/bacon-qr-code
 ```
 
-3) Run plugin migrations:
-
+Run plugin migrations
 ```bash
 php artisan winter:up
 ```
 
-## Configure enforcement
+Configure enforcement in the backend → Settings → Security → **Backend 2FA (TOTP)**
+- Off
+- All users
+- Selected roles (comma-separated role codes or names)
 
-Backend → Settings → Security → **Backend 2FA (TOTP)**
-
-- Off / All users / Selected roles (comma-separated role codes or names)
-
-## User flow
-
+## Additional information
+### User flow
 - If required and not enrolled → `/mercator/totp2fa/challenge/setup`
 - If enrolled but not verified this session → `/mercator/totp2fa/challenge`
 - After successful enrollment or regeneration → `/mercator/totp2fa/challenge/recovery` (codes shown once)
 - Users can regenerate codes at `/mercator/totp2fa/challenge/manage`
 
-## Security notes
-
+### Security notes
 - `backend.page.beforeDisplay` and `backend.ajax.beforeRunHandler` are both enforced (prevents AJAX bypass).
 - Secrets + recovery codes are encrypted using Laravel `Crypt`.
 - Recovery codes are displayed only when a one-time session flag is present, and then require an acknowledgement to mark them as shown.
+
+# License
+MIT
+
+Copyright (C) 2026 Helmut Kaufmann (software@mercator.li)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
