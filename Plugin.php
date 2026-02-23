@@ -2,19 +2,11 @@
 
 use System\Classes\PluginBase;
 use Backend\Models\User as BackendUser;
-use Backend\Facades\Backend;
 use Backend\Facades\BackendAuth;
 use Event;
 use Redirect;
 
-use Mercator\Totp2fa\Classes\Enforcement;
-use Mercator\Totp2fa\Controllers\Challenge;
-
-/**
- * Event-based enforcement:
- * - backend.page.beforeDisplay: guards normal backend navigation
- * - backend.ajax.beforeRunHandler: guards AJAX handlers to prevent bypass
- */
+use Mercator\Totp2fa\Classes\EnforceTotpMiddleware;
 class Plugin extends PluginBase
 {
     public function pluginDetails()
@@ -55,71 +47,34 @@ class Plugin extends PluginBase
 
     public function boot()
     {
-        Event::listen('backend.page.beforeDisplay', function ($controller, $action, $params) {
-            if (!BackendAuth::check()) return null;
+        // Register a global web middleware so TOTP is enforced on every request
+        // where a backend user is authenticated — including CMS pages and plugin
+        // routes outside the /meradmin URL (e.g. /portfolio-admin).
+        app('router')->pushMiddlewareToGroup('web', EnforceTotpMiddleware::class);
 
-            $user = BackendAuth::getUser();
-            if (!$user) return null;
+        // When a CMS page requires backend login and the user is NOT authenticated,
+        // redirect to the backend login page instead of showing a 404.
+        Event::listen('cms.page.init', function ($controller /*, $url, $page */) {
+            try {
+                $page = $controller->getPage();
+                if (!$page) return;
 
-            // Always allow the challenge controller to render (avoid redirect loops).
-            if ($controller instanceof Challenge) {
-                return null;
+                // Check the standard WinterCMS CMS security setting.
+                $security = $page->settings['security']
+                    ?? $page->viewBag['requiresBackendLogin']
+                    ?? $page->viewBag['security']
+                    ?? null;
+
+                if ($security !== 'backend') return;
+
+                if (!BackendAuth::check()) {
+                    $backendPrefix = trim((string) config('cms.backendUri', 'backend'), '/');
+                    $loginUrl     = url($backendPrefix . '/auth/signin');
+                    return Redirect::to($loginUrl);
+                }
+            } catch (\Throwable $e) {
+                \Log::error('TOTP2FA cms.page.init guard error: ' . $e->getMessage());
             }
-
-            // Always allow core backend auth routes.
-            $path = trim(request()->path(), '/');
-            if (str_starts_with($path, 'backend/auth')) {
-                return null;
-            }
-
-            $requires = Enforcement::requires2faForUser($user);
-            $enabled  = (bool) $user->twofa_enabled;
-
-            // No requirement and not enabled → no enforcement.
-            if (!$requires && !$enabled) return null;
-
-            // Always remember where the user wanted to go (for post-2FA redirect).
-            session(['mercator.totp2fa.intended' => request()->fullUrl()]);
-
-            // Required but not enrolled → force setup.
-            if ($requires && !$enabled) {
-                return Redirect::to(Backend::url('mercator/totp2fa/challenge/setup'));
-            }
-
-            // Enrolled but not verified for this session → force challenge.
-            if (!Enforcement::isVerifiedForSession($user)) {
-                return Redirect::to(Backend::url('mercator/totp2fa/challenge'));
-            }
-
-            return null;
-        });
-
-        Event::listen('backend.ajax.beforeRunHandler', function ($handler) {
-            if (!BackendAuth::check()) return null;
-
-            $user = BackendAuth::getUser();
-            if (!$user) return null;
-
-            $requires = Enforcement::requires2faForUser($user);
-            $enabled  = (bool) $user->twofa_enabled;
-
-            if (!$requires && !$enabled) return null;
-
-            // Allow AJAX for the challenge controller routes.
-            $path = trim(request()->path(), '/');
-            if (str_contains($path, 'mercator/totp2fa/challenge')) {
-                return null;
-            }
-
-            if ($requires && !$enabled) {
-                abort(403, '2FA setup required');
-            }
-
-            if (!Enforcement::isVerifiedForSession($user)) {
-                abort(403, '2FA verification required');
-            }
-
-            return null;
         });
 
         // Backend user management: DO NOT display recovery codes here.
